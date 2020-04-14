@@ -1,0 +1,13 @@
+extends layout
+
+block content
+	h1= title
+	p Welcome to #{title}
+
+	script.
+		var evtSource = new EventSource('http://localhost:3000/event-stream');
+		
+		evtSource.onmessage = function(e) {
+			console.log(e);
+		}
+		
