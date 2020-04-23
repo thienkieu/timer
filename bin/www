@@ -8,7 +8,16 @@ var app = require('../app');
 var debug = require('debug')('sse:server');
 var http = require('http');
 var request = require('request');
+var winston = require('winston');
+require('winston-mongodb').Mongo;
 
+var db = require('../db');
+var trackingConnectionCollection = db.trakingCollection;
+var dbConnectionUrl = db.connectionUrl;
+
+var logger = require('../logger');
+
+  
 /**
  * Get port from environment and store in Express.
  */
@@ -21,6 +30,12 @@ app.set('port', port);
  */
 
 var server = http.createServer(app);
+setInterval(function(){
+  let connectDate = new Date();
+  let connectTimestamp = connectDate.getTime();
+  // log server runing time to get exam disconnect when server down.
+  logger.log('info', '=========server runing at time:=======================' + connectTimestamp);
+}, 300000);
 
 const io = require('socket.io')(server, {
 	serveClient: false,
@@ -29,51 +44,44 @@ const io = require('socket.io')(server, {
 	cookie: false
 });
 
-const lstTokenConnect = {};
 io.on('connection', function(client) { 
-	let token = client.handshake.query.infor;
-	const previousUpdateTime = lstTokenConnect[token];
-	clearInterval(previousUpdateTime);
 	
-	const updateTimeoutInterval = setInterval(() => {
-        request.post({
-			url: 'http://backend.onlinetest.logigear.com/coordinator/exam/updateTimeout',
-			method: "POST",
-			headers: {
-				Authorization: "Bearer "+token,
-			},
-		}, function (error, response, body1) {
-			//console.log('http://backend.onlinetest.com/coordinator/exam/updateTimeout');
-			//console.log(body1);
-		});
-		
-    }, 15000);
-	lstTokenConnect[token] = updateTimeoutInterval;
-		
-	//console.log('=========connection=======================');
+	
+	let token = client.handshake.query.infor;
+	const candidateId = client.handshake.query.candidateId;
+	let connectDate = new Date();
+	let connectTimestamp = connectDate.getTime();
+
+	const data = {
+		userToken: token,
+		type: 'connect',
+		connectTime: connectTimestamp,
+		candidateId: candidateId,
+  };
+  
+  logger.log('info', '=========connection=======================' + JSON.stringify(data));
+
+	if (trackingConnectionCollection){
+		trackingConnectionCollection().insertOne(data);
+	}
+	
 	client.on('disconnect', function (reason) {
-		
-		//console.log('=====================disconnect=============================================');
-		//console.log(reason);
-		//console.log(token);		
-		
-		request.post({
-			url: 'http://backend.onlinetest.logigear.com/coordinator/exam/updateDisconnect',
-			method: "POST",
-			body: JSON.stringify({
-				reason,
-			}),
-			headers: {
-				Authorization: "Bearer "+token,
-				'content-type': 'application/json',
-			},
-		}, function (error, response, body1) {
-			console.log('http://backend.onlinetest.logigear.com/coordinator/exam/updateDisconnect');
-			console.log(body1);
-		});
-		
-		
-		clearInterval(updateTimeoutInterval);
+	
+		let disconnectDate = new Date();
+		let disconnectTimestamp = disconnectDate.getTime();
+
+		const data = {
+			userToken: token,
+			type: 'disconnect',
+			connectTime: disconnectTimestamp,
+			reason: reason,
+			candidateId: candidateId,
+    };
+    logger.log('info', '=========disconnect=======================' + JSON.stringify(data));
+
+		if (trackingConnectionCollection){
+			trackingConnectionCollection().insertOne(data);
+		}
 	 });
 });
 
