@@ -3,6 +3,7 @@ var router = express.Router();
 var request = require('request');
 var db = require('../db');
 var trackingConnectionCollection = db.trakingCollection;
+var logger = require('../logger');
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
@@ -37,6 +38,11 @@ router.get('/getLatestDisconenct', (req, res) => {
 		
 	});
     
+});
+
+router.post('/writeLog', (req, res) => {
+	res.send();
+    logger.info(JSON.stringify(req.body));
 });
 
 const returnCurrentTime = function(res) {
