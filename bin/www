@@ -7,9 +7,6 @@
 var app = require('../app');
 var debug = require('debug')('sse:server');
 var http = require('http');
-var request = require('request');
-var winston = require('winston');
-require('winston-mongodb').Mongo;
 
 var db = require('../db');
 var trackingConnectionCollection = db.trakingCollection;
@@ -53,13 +50,13 @@ io.on('connection', function(client) {
 	let connectTimestamp = connectDate.getTime();
 
 	const data = {
-		userToken: token,
+		token: token,
 		type: 'connect',
 		connectTime: connectTimestamp,
 		candidateId: candidateId,
   };
   
-  logger.log('info', '=========connection=======================' + JSON.stringify(data));
+  logger.info('=========connection=======================' + JSON.stringify(data), data);
 
 	if (trackingConnectionCollection){
 		trackingConnectionCollection().insertOne(data);
@@ -71,13 +68,13 @@ io.on('connection', function(client) {
 		let disconnectTimestamp = disconnectDate.getTime();
 
 		const data = {
-			userToken: token,
+			token: token,
 			type: 'disconnect',
 			connectTime: disconnectTimestamp,
 			reason: reason,
 			candidateId: candidateId,
     };
-    logger.log('info', '=========disconnect=======================' + JSON.stringify(data));
+    logger.info('=========disconnect=======================' + JSON.stringify(data), data);
 
 		if (trackingConnectionCollection){
 			trackingConnectionCollection().insertOne(data);

@@ -4,6 +4,7 @@ var request = require('request');
 var db = require('../db');
 var trackingConnectionCollection = db.trakingCollection;
 var logger = require('../logger');
+var cors = require('cors');
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
@@ -12,7 +13,7 @@ router.get('/', function(req, res, next) {
 
 router.get('/getLatestDisconenct', (req, res) => {
 	const token = req.query.token;
-	trackingConnectionCollection().find({userToken: token}, {projection:{connectTime: 1, type: 1, reason: 1}}).sort({connectTime: -1}).limit(1).toArray(function (err, result) {
+	trackingConnectionCollection().find({token: token}, {projection:{connectTime: 1, type: 1, reason: 1}}).sort({connectTime: -1}).limit(1).toArray(function (err, result) {
 		if (err) {
 			console.error(err);
 		}
@@ -42,8 +43,15 @@ router.get('/getLatestDisconenct', (req, res) => {
 
 router.post('/writeLog', (req, res) => {
 	res.send();
-    logger.info(JSON.stringify(req.body));
+    logger.info(JSON.stringify(req.body), req.body);
 });
+
+router.options('/clientWriteLog', cors());
+router.post('/clientWriteLog', cors(), (req, res) => {
+	res.send('ok');
+	logger.info(JSON.stringify(req.body), req.body);
+});
+
 
 const returnCurrentTime = function(res) {
 	const connectDate = new Date();

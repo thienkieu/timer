@@ -19,7 +19,8 @@ var logger = winston.createLogger({
     new winston.transports.MongoDB({
       db: dbConnectionUrl, 
       options: {useUnifiedTopology: true},
-      expireAfterSeconds: 10 //259200
+      expireAfterSeconds: 259200,
+      metaKey: 'token'
     })
   ],
   exceptionHandlers: [
