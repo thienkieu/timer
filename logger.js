@@ -20,6 +20,7 @@ var logger = winston.createLogger({
       db: dbConnectionUrl, 
       options: {useUnifiedTopology: true},
       expireAfterSeconds: 259200,
+	  collection: 'logs',
       metaKey: 'token'
     })
   ],

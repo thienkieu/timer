@@ -1,7 +1,7 @@
 let connectTrackingCollection = null;
-const connectionUrl = 'mongodb://localhost:27017/onlinetest_tracking'; 
+const connectionUrl = 'mongodb://192.168.190.92:27017/onlinetest_tracking'; 
 const MongoClient = require('mongodb').MongoClient
-MongoClient.connect('mongodb://localhost:27017/onlinetest_tracking', {useUnifiedTopology: true})
+MongoClient.connect('mongodb://192.168.190.92:27017/onlinetest_tracking', {useUnifiedTopology: true})
   .then(client => {
     // ...
     const db = client.db('onlinetest_tracking')
