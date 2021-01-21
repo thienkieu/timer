@@ -17,7 +17,7 @@
     "morgan": "~1.9.1",
     "pm2": "^4.2.3",
     "request": "^2.88.0",
-    "socket.io": "^2.3.0",
+    "socket.io": "^2.4.0",
     "winston": "^3.2.1",
     "winston-daily-rotate-file": "^4.4.2",
     "winston-mongo": "^1.1.1",
